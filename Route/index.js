@@ -8,27 +8,19 @@ let data = [{"Gender": "Male", "HeightCm": 171, "WeightKg": 96 }, { "Gender": "M
 "WeightKg": 62}, {"Gender": "Female", "HeightCm": 150, "WeightKg": 70}, {"Gender": "Female",
 "HeightCm": 167, "WeightKg": 82}];
 
+//get route for sample display
 router.get('/bmi', (req, res, next) => {
     
-    data.map((person) => {
-        const heightM = person.HeightCm/100;
-        const bmi = controller.Bmi(heightM, person.WeightKg);
-        let healthRisk = controller.CategoryRisk(bmi);
-        
-        person.BMI = bmi;
-        person.BMICategory=healthRisk.category;
-        person.HealthRisk=healthRisk.risk;  
-    })
-
-    const count = data.filter(x => x.BMICategory == 'OverWeight').length;
-    
-    const response = {
-        data,
-        Message: `Number of Overweight people are ${count}`
-    }
-    
+    const response = controller.generator(data)
     res.json({response})
     
 });
+
+//post route for checking the consistency
+router.post('/bmi', (req,res,next) => {
+    let arr = req.body;
+    const response = controller.generator(arr)
+    res.json({response})
+})
 
 module.exports = router;
