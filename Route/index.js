@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const controller = require('../Controllers/Index');
 
 //dummy data provided
 let data = [{"Gender": "Male", "HeightCm": 171, "WeightKg": 96 }, { "Gender": "Male", "HeightCm": 161, "WeightKg":
@@ -8,47 +9,19 @@ let data = [{"Gender": "Male", "HeightCm": 171, "WeightKg": 96 }, { "Gender": "M
 "HeightCm": 167, "WeightKg": 82}];
 
 router.get('/bmi', (req, res, next) => {
-    let count = 0;
-    data.map((person) => {
     
-        let category;
-        let risk;
+    data.map((person) => {
         const heightM = person.HeightCm/100;
-        const bmi = Math.round(person.WeightKg / ( heightM * heightM ) * 10) / 10;
+        const bmi = controller.Bmi(heightM, person.WeightKg);
+        let healthRisk = controller.CategoryRisk(bmi);
         
-        switch (true) {
-            case (bmi <= 18.4):
-                category = "Underweight";
-                risk = "Malnutrition risk";
-                    break;
-            case (bmi >= 18.5 && bmi <= 24.9):
-                category = "Normal weight";
-                risk = "Low risk";
-                    break;
-            case (bmi >= 25 && bmi <= 29.9):
-                category = "OverWeight";
-                risk = "Enhanced risk";
-                count++;
-                    break;
-            case (bmi >= 30 && bmi <= 34.9):
-                category = "Moderately Obese";
-                risk = "Medium risk";
-                    break;
-            case (bmi >= 35 && bmi <= 39.9):
-                category = "Severly Obese";
-                risk = "High risk";
-                    break;
-
-            default:
-                category = "Very Severly Obese";
-                risk = "Very high risk";
-                    break;
-        }
         person.BMI = bmi;
-        person.BMICategory=category;
-        person.HealthRisk=risk;        
+        person.BMICategory=healthRisk.category;
+        person.HealthRisk=healthRisk.risk;  
     })
 
+    const count = data.filter(x => x.BMICategory == 'OverWeight').length;
+    
     const response = {
         data,
         Message: `Number of Overweight people are ${count}`
